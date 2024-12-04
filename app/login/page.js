@@ -8,10 +8,19 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const router = useRouter();
 
-  const handleLogin = () => {
-    if (email.trim() === '' || password.trim() === '') {
+  const handleLogin = async () => {
+    if (username.trim() === '' || password.trim() === '') {
       alert('Please fill out all fields.');
       return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3001/login', { username, password });
+      alert(response.data.message);
+      localStorage.setItem('userId', response.data.userId);
+      router.push('/dashboard');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Login failed.');
     }
     router.push('/dashboard');
   };

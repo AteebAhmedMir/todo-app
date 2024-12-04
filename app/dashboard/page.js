@@ -1,30 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
+  const userId = localStorage.getItem('userId');
 
-  const handleAddTask = () => {
-    if (taskName.trim() !== '') {
-      setTasks([...tasks, taskName]);
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/tasks/${userId}`);
+        setTasks(response.data.tasks);
+      } catch (error) {
+        alert('Error fetching tasks.');
+      }
+    };
+
+    fetchTasks();
+  }, [userId]);
+
+  const handleAddTask = async () => {
+    if (taskName.trim() === '') {
+      alert('Task name is required.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3001/tasks', {
+        userId,
+        taskName,
+      });
+      setTasks([...tasks, response.data.task]);
       setTaskName('');
+    } catch (error) {
+      alert('Error adding task.');
     }
-  };
-
-  const handleEditTask = (index) => {
-    const newTaskName = prompt('Edit task:', tasks[index]);
-    if (newTaskName) {
-      const updatedTasks = [...tasks];
-      updatedTasks[index] = newTaskName;
-      setTasks(updatedTasks);
-    }
-  };
-
-  const handleDeleteTask = (index) => {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
-    setTasks(updatedTasks);
   };
 
   return (

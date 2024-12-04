@@ -10,7 +10,7 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (password !== confirmPassword) {
       alert('Passwords do not match.');
       return;
@@ -20,8 +20,24 @@ export default function Signup() {
       return;
     }
 
-    alert('You have successfully registered!');
-    router.push('/login');
+    try {
+      const response = await fetch('http://localhost:3001/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: name, email, password }),
+      });
+
+      if (response.ok) {
+        alert('Signup successful!');
+        router.push('/login');
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error || 'An unexpected error occurred'}`);
+      }
+    } catch (error) {
+      console.error('Error during signup:', error);
+      alert('An error occurred while signing up. Please try again later.');
+    }
   };
 
   return (
